@@ -521,6 +521,7 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
       <strong style="color:var(--pink)">Tavs uzdevums šonedēļ:</strong><br>
       <span style="font-size:clamp(12px,1.1vw,15px)">✅ Pārbaudi savus abonementus &nbsp;·&nbsp; ✅ Meklē sevi Google &nbsp;·&nbsp; ✅ Izvirzi uzkrājumu mērķi</span>
     </div>
+    <div id="save-status" style="margin-top:12px;font-size:clamp(11px,1vw,13px);color:#aaa;text-align:center;min-height:18px;"></div>
   </div>
   <div class="btn-row" style="justify-content:center">
     <button class="btn btn-s" onclick="go(15)">← Atpakaļ</button>
@@ -887,7 +888,8 @@ function checkSort() {
         (correct
           ? ';background:#d1fae5;border-left:4px solid #2e7d32;color:#1b5e20;border-radius:8px;'
           : ';background:#fee2e2;border-left:4px solid #c62828;color:#c62828;border-radius:8px;');
-      pi.querySelector('button').style.display='none'; // hide × remove button
+      var btn = pi.querySelector('button');
+      if (btn) btn.style.display='none';
       var icon = document.createElement('span');
       icon.style.cssText='margin-left:6px;font-size:14px;flex-shrink:0';
       icon.textContent = correct ? '✅' : '❌';
@@ -968,24 +970,43 @@ function showFinal() {
 /* ── GITHUB RESULTS ──────────────────────────────────── */
 function saveResult(name, pts) {
   if (!name) return;
+  var statusEl = document.getElementById('save-status');
+  if (statusEl) { statusEl.textContent = '💾 Saglabā rezultātu...'; statusEl.style.color='#aaa'; }
   var url = 'https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+GH_FILE;
   var headers = { 'Authorization': 'token '+GH_TOKEN, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
-  // First read existing file to get SHA
-  fetch(url, { headers: headers })
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      var existing = [];
-      if (data.content) {
-        try { existing = JSON.parse(atob(data.content.replace(/\n/g,''))); } catch(e){}
-      }
-      // Add new entry
-      existing.push({ name: name, score: pts, time: new Date().toISOString() });
-      var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
-      var body = { message: 'Result: '+name+' ('+pts+' pts)', content: encoded };
-      if (data.sha) body.sha = data.sha;
-      return fetch(url, { method: 'PUT', headers: headers, body: JSON.stringify(body) });
-    })
-    .catch(function(e){ console.warn('Could not save result:', e); });
+
+  function doSave(attempt) {
+    fetch(url+'?t='+Date.now(), { headers: headers })
+      .then(function(r){
+        if (!r.ok) throw new Error('Read failed: '+r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        var existing = [];
+        if (data.content) {
+          try { existing = JSON.parse(atob(data.content.replace(/\n/g,''))); } catch(e){}
+        }
+        existing.push({ name: name, score: pts, time: new Date().toISOString() });
+        var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
+        var body = { message: 'Result: '+name+' ('+pts+' pts)', content: encoded };
+        if (data.sha) body.sha = data.sha;
+        return fetch(url, { method: 'PUT', headers: headers, body: JSON.stringify(body) });
+      })
+      .then(function(r){
+        if (r.status === 409 && attempt < 3) {
+          // SHA conflict - retry
+          setTimeout(function(){ doSave(attempt+1); }, 500 * attempt);
+          return;
+        }
+        if (!r.ok) throw new Error('Write failed: '+r.status);
+        if (statusEl) { statusEl.textContent = '✅ Rezultāts saglabāts!'; statusEl.style.color='#2e7d32'; }
+      })
+      .catch(function(e){
+        console.warn('Could not save result:', e);
+        if (statusEl) { statusEl.textContent = '⚠️ Nevarēja saglabāt ('+e.message+')'; statusEl.style.color='#c62828'; }
+      });
+  }
+  doSave(1);
 }
 
 function loadLeaderboard() {
