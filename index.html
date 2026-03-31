@@ -139,6 +139,9 @@ main { flex: 1; display: flex; flex-direction: column; align-items: center; just
 .pbtn { background: #fff; border: 2px solid #e0e0e0; border-radius: 10px; padding: clamp(12px,1.5vh,17px) clamp(14px,1.5vw,20px); font-family: 'Roboto',sans-serif; font-size: clamp(13px,1.2vw,17px); font-weight: 500; color: var(--dark); cursor: pointer; text-align: left; transition: all .2s; display: flex; align-items: center; gap: 10px; }
 .pbtn:hover:not(:disabled) { border-color: var(--purple); background: rgba(128,79,145,.04); }
 .pbtn.voted { background: rgba(128,79,145,.08); border-color: var(--purple); color: var(--purple); font-weight: 700; }
+.vbtn.voted { font-weight: 700; }
+.vbtn.legit.voted { background: #e8f5e9; border-color: #2e7d32; color: #1b5e20; }
+.vbtn.scam.voted { background: #ffebee; border-color: #c62828; color: #c62828; }
 .pbar-wrap { display: flex; align-items: center; gap: 10px; width: 100%; }
 .pbar-bg { flex: 1; height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
 .pbar-fill { height: 100%; background: var(--purple); border-radius: 4px; transition: width 1s ease; }
@@ -273,9 +276,12 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
   <div class="slide-content">
     <span class="tag">🎮 MINISPĒLE — Atpazīsti krāpšanu</span>
     <h2>Īsts vai Krāpniecisks?</h2>
-    <div class="subtitle">Izlasi katru ziņojumu. Vai tas ir īsts vai pikšķerēšanas mēģinājums? +10 pts par katru pareizo atbildi.</div>
+    <div class="subtitle">Izlasi katru ziņojumu un atzīmē katru. Kad esi gatavs — spied Pārbaudīt. +10 pts par katru pareizo.</div>
     <div id="phgame"></div>
     <div class="ph-score" id="phscore" style="display:none"></div>
+    <div class="btn-row" style="margin-top:10px;justify-content:flex-start;">
+      <button class="btn btn-s" id="phcheck" onclick="checkPh()" disabled>Pārbaudīt atbildes</button>
+    </div>
   </div>
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(4)">← Atpakaļ</button>
@@ -331,13 +337,12 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
     </div>
     <div id="sortfb" class="fb" style="margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5;display:none"></div>
     <div class="btn-row" style="margin-top:10px;justify-content:flex-start;">
-      <button class="btn btn-s" onclick="checkSort()">Pārbaudi atbildes</button>
-      <button class="btn btn-s" onclick="resetSort()">Sākt no jauna</button>
+      <button class="btn btn-s" id="sortcheck" onclick="checkSort()" disabled>Pārbaudīt atbildes</button>
     </div>
   </div>
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(7)">← Atpakaļ</button>
-    <button class="btn btn-p" onclick="go(9)">Tālāk →</button>
+    <button class="btn btn-p" id="sortnext" onclick="go(9)" disabled>Tālāk →</button>
   </div>
 </div>
 
@@ -643,37 +648,60 @@ var msgs = [
   { from:'no-reply@spotify.com', name:'🎵 Spotify', bg:'#f9f9f9', body:'Tavs Spotify Premium abonements tiks atjaunots 15. aprīlī par 9,99 €. Lai pārvaldītu abonementu, apmeklē sava konta iestatījumus: spotify.com/account.', scam:false, exp:'✅ ĪSTS: Reāls domēns, nav steidzamības, nav dīvainu saišu, nav lūguma pēc personas datiem.' },
   { from:'freegifts@discord-nitro-free.com', name:'👾 Discord Atbalsts', bg:'#ede7f6', body:'Apsveicam! Tu esi izvēlēts BEZMAKSAS Discord Nitro (1 gads). Saņem savu dāvanu, ievadot pieteikšanās datus: discord-nitro-free.com/claim — piedāvājums beidzas pēc 30 minūtēm!', scam:true, exp:'🚩 KRĀPŠANA: Viltus domēns, steidzamības taimeris, lūdz pieteikšanās datus.' }
 ];
+var phGuesses = {};
 
 function initPh() {
   var c = document.getElementById('phgame');
-  c.innerHTML=''; phDone=0; phOk=0;
+  c.innerHTML=''; phDone=0; phOk=0; phGuesses={};
   document.getElementById('phnext').disabled=true;
+  document.getElementById('phcheck').disabled=true;
   document.getElementById('phscore').style.display='none';
   msgs.forEach(function(m,i){
     var d = document.createElement('div');
     d.className='msg-card'; d.id='mc'+i;
-    d.innerHTML='<div class="msg-head" style="background:'+m.bg+'"><div class="mavatar">'+m.name.split(' ')[0]+'</div><div><div class="msender">'+m.name+'</div><div class="mfrom">No: '+m.from+'</div></div></div><div class="mbody">'+m.body+'</div><div style="padding:0 16px 14px"><div class="vbtns"><button class="vbtn legit" onclick="ph('+i+',false)">✅ Izskatās īsts</button><button class="vbtn scam" onclick="ph('+i+',true)">🚩 Tā ir krāpšana!</button></div><div id="phfb'+i+'" style="display:none;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5"></div></div>';
+    d.innerHTML='<div class="msg-head" style="background:'+m.bg+'"><div class="mavatar">'+m.name.split(' ')[0]+'</div><div><div class="msender">'+m.name+'</div><div class="mfrom">No: '+m.from+'</div></div></div>'
+      +'<div class="mbody">'+m.body+'</div>'
+      +'<div style="padding:0 16px 14px"><div class="vbtns">'
+      +'<button class="vbtn legit" id="pb'+i+'legit" onclick="phSelect('+i+',false)">✅ Izskatās īsts</button>'
+      +'<button class="vbtn scam" id="pb'+i+'scam" onclick="phSelect('+i+',true)">🚩 Tā ir krāpšana!</button>'
+      +'</div><div id="phfb'+i+'" style="display:none;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5"></div></div>';
     c.appendChild(d);
   });
 }
 
-function ph(i, guess) {
-  var m = msgs[i];
-  document.getElementById('mc'+i).querySelectorAll('.vbtn').forEach(function(b){ b.disabled=true; });
-  var fb = document.getElementById('phfb'+i);
-  if (guess===m.scam) {
-    fb.style.cssText='display:block;background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5';
-    fb.innerHTML='<strong>+10 pts — Labi pamanīts!</strong> '+m.exp;
-    addPts(10); phOk++;
-  } else {
-    fb.style.cssText='display:block;background:#ffebee;border-left:4px solid #c62828;color:#b71c1c;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5';
-    fb.innerHTML='<strong>Nav gluži tā.</strong> '+m.exp;
+function phSelect(i, isScam) {
+  phGuesses[i] = isScam;
+  // Highlight selected button
+  document.getElementById('pb'+i+'legit').classList.toggle('voted', !isScam);
+  document.getElementById('pb'+i+'scam').classList.toggle('voted', isScam);
+  // Enable check button once all answered
+  if (Object.keys(phGuesses).length === msgs.length) {
+    document.getElementById('phcheck').disabled = false;
   }
-  phDone++;
-  if (phDone===msgs.length) {
-    var s=document.getElementById('phscore'); s.style.display='block'; s.textContent=phOk+'/'+msgs.length+' pareizi atpazīti! 🎯';
-    document.getElementById('phnext').disabled=false;
-  }
+}
+
+function checkPh() {
+  document.getElementById('phcheck').disabled = true;
+  phOk = 0;
+  msgs.forEach(function(m, i) {
+    var guess = phGuesses[i];
+    // Lock buttons
+    document.getElementById('pb'+i+'legit').disabled = true;
+    document.getElementById('pb'+i+'scam').disabled = true;
+    var fb = document.getElementById('phfb'+i);
+    var correct = (guess === m.scam);
+    if (correct) {
+      fb.style.cssText='display:block;background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5';
+      fb.innerHTML='<strong>✅ Pareizi! +10 pts</strong> '+m.exp;
+      addPts(10); phOk++;
+    } else {
+      fb.style.cssText='display:block;background:#ffebee;border-left:4px solid #c62828;color:#b71c1c;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5';
+      fb.innerHTML='<strong>❌ Nav pareizi.</strong> '+m.exp;
+    }
+  });
+  var s=document.getElementById('phscore'); s.style.display='block';
+  s.textContent=phOk+'/'+msgs.length+' pareizi atpazīti! 🎯';
+  document.getElementById('phnext').disabled=false;
 }
 
 /* ── SORT GAME ───────────────────────────────────────── */
@@ -787,35 +815,68 @@ function placeIt(i, z) {
   var p=document.createElement('div'); p.className='placed-item'; p.id='pi'+i;
   p.innerHTML='<span>'+items[i].t+'</span><button onclick="unplace('+i+')">×</button>';
   document.getElementById(z+'zone').appendChild(p);
+  checkAllPlaced();
 }
 
 function unplace(i) {
   sortState[i]=null;
   var di=document.getElementById('di'+i); if(di){ di.classList.remove('placed'); }
   var pi=document.getElementById('pi'+i); if(pi) pi.remove();
+  checkAllPlaced();
 }
 
 function sortMenu() {} // no-op, kept for safety
 
+function checkAllPlaced() {
+  var allPlaced = items.every(function(_, i){ return sortState[i] !== null; });
+  var btn = document.getElementById('sortcheck');
+  if (btn) btn.disabled = !allPlaced;
+}
+
 function checkSort() {
   if (sortDone) return;
-  var ok=0, tot=0;
-  for (var k in sortState) {
-    if (sortState[k]!==null) { tot++; if((sortState[k]==='n')===items[k].n) ok++; }
-  }
-  var fb=document.getElementById('sortfb');
-  if (tot===0) {
-    fb.style.cssText='display:block;background:#ffebee;border-left:4px solid #c62828;color:#b71c1c;margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
-    fb.innerHTML='<strong>Vispirms ievieto vismaz dažas lietas!</strong>'; return;
-  }
+  var ok=0;
+  items.forEach(function(it, k) {
+    var z = sortState[k];
+    if (z === null) return;
+    var correct = (z==='n') === it.n;
+    if (correct) ok++;
+    // Highlight the placed item card
+    var pi = document.getElementById('pi'+k);
+    if (pi) {
+      pi.style.cssText = pi.style.cssText +
+        (correct
+          ? ';background:#d1fae5;border-left:4px solid #2e7d32;color:#1b5e20;border-radius:8px;'
+          : ';background:#fee2e2;border-left:4px solid #c62828;color:#c62828;border-radius:8px;');
+      pi.querySelector('button').style.display='none'; // hide × remove button
+      var icon = document.createElement('span');
+      icon.style.cssText='margin-left:6px;font-size:14px;flex-shrink:0';
+      icon.textContent = correct ? '✅' : '❌';
+      pi.appendChild(icon);
+    }
+    // Lock the draggable item
+    var di = document.getElementById('di'+k);
+    if (di) { di.setAttribute('draggable','false'); di.style.pointerEvents='none'; }
+  });
+
   var p=ok*5; addPts(p); sortDone=true;
-  if (ok===tot && tot===items.length) {
-    fb.style.cssText='display:block;background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20;margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
-    fb.innerHTML='<strong>Perfekti! '+ok+'/'+items.length+' pareizi — +'+p+' punkti! 🎉</strong> Transports un pamata telefons ir vajadzības. Starbucks un AirPods ir vēlmes.';
-  } else {
-    fb.style.cssText='display:block;background:'+(ok>=tot*.7?'#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20':'#ffebee;border-left:4px solid #c62828;color:#b71c1c')+';margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
-    fb.innerHTML='<strong>'+ok+'/'+tot+' pareizi — +'+p+' punkti.</strong> Pamata telefons ir vajadzība; AirPods Pro ir vēlme.';
-  }
+
+  // Lock drop zones
+  document.querySelectorAll('.drop-zone').forEach(function(z){
+    z.style.pointerEvents='none';
+  });
+
+  var fb=document.getElementById('sortfb');
+  fb.style.cssText='display:block;margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5;'
+    +(ok===items.length
+      ? 'background:#d1fae5;border-left:4px solid #2e7d32;color:#1b5e20;'
+      : ok>=items.length*.7
+        ? 'background:#d1fae5;border-left:4px solid #2e7d32;color:#1b5e20;'
+        : 'background:#fee2e2;border-left:4px solid #c62828;color:#c62828;');
+  fb.innerHTML='<strong>'+(ok===items.length?'Perfekti! 🎉':ok+'/'+items.length+' pareizi')+' — +'+p+' punkti.</strong> Vajadzības: pārtika, zāles, mājoklis, pamata telefons, transports. Vēlmes: Nike, PlayStation, Starbucks, AirPods, koncerts.';
+
+  document.getElementById('sortcheck').disabled = true;
+  document.getElementById('sortnext').disabled = false;
 }
 
 function resetSort() { sortDone=false; initSort(); }
@@ -919,7 +980,7 @@ function loadLeaderboard() {
 
 /* ── RESTART ─────────────────────────────────────────── */
 function restart() {
-  score=0; phDone=0; phOk=0; sortState={}; sortDone=false; quizResults={}; playerName='';
+  score=0; phDone=0; phOk=0; phGuesses={}; sortState={}; sortDone=false; quizResults={}; playerName='';
   document.getElementById('pts').textContent=0;
   document.getElementById('playerName').value='';
   document.getElementById('startBtn').disabled=true;
