@@ -195,13 +195,7 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
 
 <!-- NAME ENTRY -->
 <div class="slide active" id="s0">
-  <div class="slide-hero" style="max-width:520px;margin:0 auto;position:relative">
-    <!-- QR code top-right corner -->
-    <div style="position:absolute;top:clamp(10px,1.5vh,16px);right:clamp(10px,1.5vw,16px);text-align:center;">
-      <canvas id="qr-canvas" style="width:clamp(70px,8vw,90px);height:clamp(70px,8vw,90px);border-radius:8px;display:block;padding:4px;background:#251F30;"></canvas>
-      <span style="font-size:clamp(9px,0.8vw,11px);color:#ffffff;opacity:.8;margin-top:4px;display:block;">Skenē &amp; spēlē!</span>
-    </div>
-    
+  <div class="slide-hero" style="max-width:520px;margin:0 auto">
     <h1>Es &amp; <span>Nauda</span></h1>
     <div class="time-tag">⏱ 20 minūtes · Interaktīvs · Tests</div>
     <br>
@@ -218,6 +212,12 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
     </button>
     <br><br>
     <p class="topics">Tēmas: <strong style="color:#FFB3B3">Krāpšana</strong> · <strong style="color:#FFB3B3">Uzkrājumi</strong> · <strong style="color:#FFB3B3">Vajadzības vs vēlmes</strong> · <strong style="color:#FFB3B3">Digitālā pēda</strong></p>
+    <!-- QR code bottom center -->
+    <div style="margin-top:clamp(24px,3.5vh,40px);text-align:center;">
+      <canvas id="qr-canvas" style="width:clamp(130px,18vw,180px);height:clamp(130px,18vw,180px);border-radius:12px;display:inline-block;padding:8px;background:#fff;"></canvas>
+      <div style="font-size:clamp(11px,1vw,14px);color:#ffffff;opacity:.7;margin-top:8px;">Skenē &amp; spēlē!</div>
+      <div style="font-size:clamp(10px,0.85vw,12px);color:#FFB3B3;opacity:.6;margin-top:3px;">finansu-pratiba.vercel.app</div>
+    </div>
   </div>
 </div>
 
@@ -1102,9 +1102,9 @@ function drawQR() {
     canvas.height = size;
     var ctx = canvas.getContext('2d');
     var cell = size / count;
-    ctx.fillStyle = '#251F30';
-    ctx.fillRect(0, 0, size, size);
     ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#251F30';
     for (var r = 0; r < count; r++) {
       for (var c = 0; c < count; c++) {
         if (qr.isDark(r, c)) {
