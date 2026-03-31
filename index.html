@@ -610,14 +610,30 @@ function vote(btn, id) {
   var all = document.getElementById(id).querySelectorAll('.pbtn');
   all.forEach(function(b){ b.disabled=true; });
   btn.classList.add('voted');
-  var pcts = [35,28,22,15];
+  var data = [
+    { pct:35, fact:'Apģērbs & sneakeri ir #1 tēriņu kategorija Latvijas pusaudžiem 👟' },
+    { pct:28, fact:'Ēdiens ārpus mājas — vidēji 40–60 € mēnesī jauniešiem Latvijā 🍔' },
+    { pct:22, fact:'Vidēji 3–5 aktīvi abonementi vienam jaunietim, daudzus viņi pat neizmanto 🎮' },
+    { pct:15, fact:'Tikai 15 % jauniešu regulāri uzkrāj — tu vari būt šajā grupā! 💾' }
+  ];
   all.forEach(function(b,i){
     var d = document.createElement('div');
     d.className = 'pbar-wrap';
-    d.innerHTML = '<div class="pbar-bg"><div class="pbar-fill" style="width:0"></div></div><span class="ppct">'+pcts[i]+' %</span>';
+    d.innerHTML = '<div class="pbar-bg"><div class="pbar-fill" style="width:0"></div></div><span class="ppct">'+data[i].pct+' %</span>';
     b.appendChild(d);
-    setTimeout(function(){ d.querySelector('.pbar-fill').style.width=pcts[i]+'%'; }, 100);
+    setTimeout(function(){ d.querySelector('.pbar-fill').style.width=data[i].pct+'%'; }, 100);
   });
+  // Show fact for chosen answer
+  var factEl = document.createElement('div');
+  var chosen = Array.from(all).indexOf(btn);
+  factEl.style.cssText='margin-top:14px;background:rgba(128,79,145,.08);border-left:4px solid var(--purple);border-radius:0 8px 8px 0;padding:10px 14px;font-size:clamp(12px,1.1vw,15px);color:var(--dark);line-height:1.5';
+  factEl.innerHTML='<strong>💡 Latvijas tendence:</strong> ' + data[chosen].fact;
+  document.getElementById(id).appendChild(factEl);
+  // Add explanation of what % means
+  var explEl = document.createElement('div');
+  explEl.style.cssText='margin-top:8px;font-size:clamp(11px,0.9vw,13px);color:var(--grey);padding:0 4px';
+  explEl.textContent='% rāda, cik daudz Latvijas jauniešu izvēlas katru kategoriju kā galveno tēriņu.';
+  document.getElementById(id).appendChild(explEl);
   addPts(5);
 }
 
