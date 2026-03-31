@@ -1,1 +1,857 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Nauda & Es – Finanšu Pratība | Citadele</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #E3002C; --dark: #251F30; --pink: #FFB3B3;
+  --grey: #675F6B; --purple: #804F91; --white: #F9F9F9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100%; overscroll-behavior: none; overscroll-behavior-y: none; }
+body { font-family: 'Roboto', sans-serif; background: var(--white); color: var(--dark); display: flex; flex-direction: column; min-height: 100vh; touch-action: pan-x pan-y; }
 
+header { background: #fff; border-bottom: 3px solid var(--red); padding: clamp(10px,1.5vh,18px) clamp(16px,3vw,52px); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-c { width: clamp(34px,3vw,46px); height: clamp(34px,3vw,46px); background: var(--red); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: clamp(18px,1.8vw,26px); font-weight: 700; flex-shrink: 0; }
+.logo-text { font-size: clamp(15px,1.4vw,22px); font-weight: 700; }
+.logo-sub { font-size: clamp(10px,0.85vw,13px); color: var(--grey); }
+.progress-wrap { display: flex; align-items: center; gap: 10px; }
+.slide-counter { font-size: clamp(11px,0.9vw,14px); color: var(--grey); white-space: nowrap; }
+.prog-outer { width: clamp(100px,13vw,240px); height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+.prog-inner { height: 100%; background: var(--red); border-radius: 4px; transition: width .5s ease; }
+.score-badge { background: var(--purple); color: #fff; border-radius: 20px; padding: clamp(3px,.5vh,7px) clamp(10px,1.2vw,18px); font-size: clamp(11px,1vw,15px); font-weight: 700; white-space: nowrap; transition: background .3s, transform .3s; }
+
+main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(16px,3vh,52px) clamp(12px,5vw,80px); overflow-y: auto; }
+.slide { display: none; width: 100%; max-width: min(1100px,96vw); }
+.slide.active { display: block; animation: fadeIn .4s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+
+/* SLIDE TYPES */
+.slide-hero { text-align: center; background: var(--dark); color: #fff; border-radius: 20px; padding: clamp(40px,8vh,96px) clamp(32px,7vw,96px); }
+.eyebrow { font-size: clamp(11px,1vw,14px); font-weight: 700; letter-spacing: 2px; color: var(--pink); text-transform: uppercase; margin-bottom: clamp(10px,1.5vh,20px); }
+.slide-hero h1 { font-size: clamp(36px,6vw,80px); font-weight: 900; line-height: 1.1; margin-bottom: clamp(14px,2vh,28px); }
+.slide-hero h1 span { color: var(--pink); }
+.time-tag { display: inline-block; background: rgba(255,255,255,.1); border-radius: 20px; padding: clamp(5px,.8vh,10px) clamp(14px,1.8vw,26px); font-size: clamp(12px,1.2vw,17px); color: #fff; margin-bottom: clamp(14px,2.5vh,32px); }
+.topics { font-size: clamp(13px,1.2vw,17px); color: #ccc; }
+
+.slide-section { background: var(--red); color: #fff; border-radius: 20px; padding: clamp(48px,10vh,110px) clamp(32px,7vw,96px); text-align: center; }
+.chapter { font-size: clamp(11px,1vw,14px); font-weight: 700; letter-spacing: 2px; opacity: .8; text-transform: uppercase; margin-bottom: clamp(10px,1.5vh,16px); }
+.slide-section h2 { font-size: clamp(28px,5vw,66px); font-weight: 900; margin-bottom: clamp(10px,1.5vh,18px); }
+.slide-section p { font-size: clamp(15px,1.6vw,24px); opacity: .9; }
+.big-icon { font-size: clamp(48px,6.5vw,86px); margin-bottom: clamp(14px,2vh,26px); }
+
+.slide-content { background: #fff; border-radius: 20px; padding: clamp(28px,4vh,60px) clamp(28px,5vw,72px); box-shadow: 0 4px 32px rgba(37,31,48,.09); }
+.slide-content h2 { font-size: clamp(20px,2.4vw,36px); font-weight: 700; margin-bottom: 8px; }
+.subtitle { font-size: clamp(13px,1.1vw,17px); color: var(--grey); margin-bottom: clamp(18px,2.5vh,34px); line-height: 1.55; }
+.tag { display: inline-block; background: rgba(128,79,145,.1); color: var(--purple); border-radius: 4px; padding: 4px 12px; font-size: clamp(10px,.9vw,13px); font-weight: 700; margin-bottom: clamp(12px,1.5vh,22px); }
+
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(clamp(160px,18vw,240px),1fr)); gap: clamp(10px,1.5vh,18px); margin: clamp(12px,2vh,22px) 0; }
+.info-card { border-radius: 12px; padding: clamp(14px,1.8vh,22px); background: var(--white); border: 2px solid transparent; }
+.info-card.rb { border-color: var(--red); } .info-card.pb { border-color: var(--purple); } .info-card.pkb { border-color: var(--pink); }
+.card-icon { font-size: clamp(22px,2.5vw,34px); margin-bottom: 8px; }
+.info-card h3 { font-size: clamp(14px,1.2vw,17px); font-weight: 700; margin-bottom: 6px; }
+.info-card p { font-size: clamp(12px,1vw,14px); color: var(--grey); line-height: 1.5; }
+
+.qquestion { font-size: clamp(17px,2vw,28px); font-weight: 700; margin-bottom: 10px; line-height: 1.35; }
+.qscenario { font-size: clamp(12px,1.1vw,16px); color: var(--grey); background: var(--white); border-left: 4px solid var(--red); padding: clamp(10px,1.2vh,15px) clamp(12px,1.5vw,20px); border-radius: 0 8px 8px 0; margin-bottom: clamp(14px,2.5vh,26px); line-height: 1.5; }
+.opts { display: grid; gap: clamp(8px,1.2vh,14px); }
+.opt { background: #fff; border: 2px solid #e0e0e0; border-radius: 10px; padding: clamp(11px,1.5vh,18px) clamp(12px,1.5vw,22px); font-family: 'Roboto',sans-serif; font-size: clamp(13px,1.2vw,17px); font-weight: 500; color: var(--dark); cursor: pointer; text-align: left; transition: all .2s; display: flex; align-items: center; gap: 12px; }
+.opt:hover:not(:disabled) { border-color: var(--purple); background: rgba(128,79,145,.05); }
+.opt.correct { border-color: #2e7d32; background: #e8f5e9; color: #1b5e20; }
+.opt.wrong-pick { border-color: #c62828; background: #ffebee; color: #c62828; }
+.opt:disabled { cursor: not-allowed; }
+.oletter { width: clamp(24px,2vw,32px); height: clamp(24px,2vw,32px); border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: clamp(11px,1vw,14px); font-weight: 700; flex-shrink: 0; }
+.correct .oletter { background: #2e7d32; color: #fff; }
+.wrong-pick .oletter { background: #c62828; color: #fff; }
+
+/* SORT GAME */
+.drag-area { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(10px,1.5vh,18px); margin: clamp(10px,1.5vh,18px) 0; }
+.drop-zone { border: 2px dashed #ccc; border-radius: 12px; padding: clamp(12px,1.5vh,18px); min-height: clamp(120px,16vh,200px); }
+.drop-zone.nz { border-color: var(--purple); } .drop-zone.wz { border-color: var(--red); }
+.item-bank { display: flex; flex-wrap: wrap; gap: 8px; margin: clamp(10px,1.5vh,18px) 0; }
+.ditem { background: #fff; border: 2px solid #e0e0e0; border-radius: 20px; padding: clamp(5px,.8vh,9px) clamp(10px,1.2vw,16px); font-size: clamp(12px,1vw,14px); font-weight: 500; cursor: grab; transition: all .2s; font-family: 'Roboto',sans-serif; user-select: none; }
+.ditem:hover { border-color: var(--purple); background: rgba(128,79,145,.05); }
+.ditem.dragging { opacity: .4; cursor: grabbing; }
+.ditem.placed { opacity: .4; pointer-events: none; }
+.drop-zone.drag-over { background: rgba(128,79,145,.08); border-style: solid; }
+.placed-item { background: var(--white); border-radius: 8px; padding: 5px 10px; font-size: clamp(11px,1vw,14px); margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; }
+.placed-item button { background: none; border: none; color: var(--grey); cursor: pointer; font-size: 15px; padding: 0 0 0 6px; }
+.zlabel { font-size: clamp(10px,.9vw,12px); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; display: block; }
+.nz .zlabel { color: var(--purple); } .wz .zlabel { color: var(--red); }
+
+/* CALCULATOR */
+.calc-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(10px,1.5vh,16px); }
+.preset-btn { background: #fff; border: 2px solid #e0e0e0; border-radius: 20px; padding: clamp(6px,0.8vh,10px) clamp(12px,1.5vw,20px); font-family: 'Roboto',sans-serif; font-size: clamp(12px,1.1vw,16px); font-weight: 700; cursor: pointer; transition: all .2s; color: var(--dark); }
+.preset-btn:hover { border-color: var(--purple); background: rgba(128,79,145,.06); }
+.preset-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+.calc-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px,3vw,40px); }
+.calc-inputs label { display: block; font-size: clamp(13px,1.1vw,16px); font-weight: 700; margin-bottom: 6px; }
+.calc-inputs input[type=range] { width: 100%; accent-color: var(--red); margin-bottom: 4px; }
+.val-disp { font-size: clamp(18px,2vw,28px); font-weight: 900; color: var(--red); }
+.igroup { margin-bottom: clamp(14px,2vh,24px); }
+.calc-res { background: var(--dark); color: #fff; border-radius: 14px; padding: clamp(18px,3vh,38px); display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.rlabel { font-size: clamp(11px,.9vw,13px); color: #aaa; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.rvalue { font-size: clamp(30px,4vw,54px); font-weight: 900; color: var(--pink); }
+.rsub { font-size: clamp(12px,1vw,14px); color: #aaa; margin-top: 8px; }
+.rmot { font-size: clamp(13px,1.1vw,16px); color: #fff; margin-top: 14px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 14px; line-height: 1.4; }
+
+/* PHISHING */
+.msg-card { border: 2px solid #e0e0e0; border-radius: 12px; overflow: hidden; margin-bottom: clamp(10px,1.5vh,16px); }
+.msg-head { padding: clamp(10px,1.2vh,14px) 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e0e0e0; }
+.mavatar { width: 34px; height: 34px; border-radius: 50%; background: #e8e8e8; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.msender { font-size: clamp(13px,1.1vw,15px); font-weight: 700; }
+.mfrom { font-size: clamp(10px,.9vw,12px); color: var(--grey); }
+.mbody { padding: clamp(12px,1.5vh,18px); font-size: clamp(13px,1.1vw,15px); line-height: 1.6; }
+.vbtns { display: flex; gap: 12px; margin-top: 12px; }
+.vbtn { flex: 1; border: 2px solid #e0e0e0; border-radius: 8px; padding: clamp(8px,1vh,13px); font-family: 'Roboto',sans-serif; font-size: clamp(13px,1.1vw,15px); font-weight: 700; cursor: pointer; transition: all .2s; }
+.vbtn.legit { border-color: #2e7d32; color: #2e7d32; background: #fff; }
+.vbtn.legit:hover:not(:disabled) { background: #e8f5e9; }
+.vbtn.scam { border-color: #c62828; color: #c62828; background: #fff; }
+.vbtn.scam:hover:not(:disabled) { background: #ffebee; }
+.vbtn:disabled { opacity: .5; cursor: not-allowed; }
+.ph-score { font-size: clamp(20px,2.5vw,34px); font-weight: 900; text-align: center; margin: 12px 0; color: var(--red); }
+
+/* FOOTPRINT */
+.fp-line { position: relative; padding-left: clamp(22px,2.5vw,34px); }
+.fp-line::before { content:''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: #e0e0e0; }
+.fp-item { position: relative; margin-bottom: clamp(10px,1.8vh,18px); padding: clamp(10px,1.5vh,16px); background: var(--white); border-radius: 10px; }
+.fp-item::before { content:''; position: absolute; left: -22px; top: 16px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--red); }
+.fp-app { font-weight: 700; margin-bottom: 4px; font-size: clamp(13px,1.1vw,15px); }
+.fp-data { color: var(--grey); line-height: 1.5; font-size: clamp(12px,1vw,14px); }
+.fp-risk { display: inline-block; margin-top: 6px; font-size: clamp(10px,.8vw,12px); font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.rh { background: #ffebee; color: #c62828; } .rm { background: #fff8e1; color: #f57f17; } .rl { background: #e8f5e9; color: #2e7d32; }
+
+/* TIPS */
+.tips { list-style: none; }
+.tips li { display: flex; gap: 12px; align-items: flex-start; padding: clamp(8px,1.2vh,13px) 0; border-bottom: 1px solid #f0f0f0; font-size: clamp(13px,1.1vw,16px); line-height: 1.5; }
+.tips li:last-child { border-bottom: none; }
+.tnum { width: clamp(22px,2vw,28px); height: clamp(22px,2vw,28px); border-radius: 50%; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; font-size: clamp(11px,1vw,13px); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+/* POLL */
+.poll-opts { display: grid; gap: clamp(8px,1.2vh,13px); }
+.pbtn { background: #fff; border: 2px solid #e0e0e0; border-radius: 10px; padding: clamp(12px,1.5vh,17px) clamp(14px,1.5vw,20px); font-family: 'Roboto',sans-serif; font-size: clamp(13px,1.2vw,17px); font-weight: 500; color: var(--dark); cursor: pointer; text-align: left; transition: all .2s; display: flex; align-items: center; gap: 10px; }
+.pbtn:hover:not(:disabled) { border-color: var(--purple); background: rgba(128,79,145,.04); }
+.pbtn.voted { background: rgba(128,79,145,.08); border-color: var(--purple); color: var(--purple); font-weight: 700; }
+.pbar-wrap { display: flex; align-items: center; gap: 10px; width: 100%; }
+.pbar-bg { flex: 1; height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden; }
+.pbar-fill { height: 100%; background: var(--purple); border-radius: 4px; transition: width 1s ease; }
+.ppct { font-size: clamp(12px,1vw,14px); font-weight: 700; color: var(--purple); min-width: 36px; text-align: right; }
+
+/* SUMMARY */
+.sum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(10px,1.5vh,18px); }
+.sum-card { border-radius: 12px; padding: clamp(14px,2vh,22px); text-align: center; }
+.sum-card h3 { font-size: clamp(13px,1.2vw,16px); font-weight: 700; margin-bottom: 6px; }
+.sum-card p { font-size: clamp(12px,1vw,14px); color: var(--grey); line-height: 1.4; }
+.s1{background:rgba(227,0,44,.07);} .s2{background:rgba(128,79,145,.07);} .s3{background:rgba(255,179,179,.25);} .s4{background:rgba(103,95,107,.07);}
+
+/* FINAL */
+.score-circle { width: clamp(100px,12vw,156px); height: clamp(100px,12vw,156px); border-radius: 50%; background: var(--red); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto clamp(14px,2vh,26px); }
+.sc-num { font-size: clamp(36px,5vw,62px); font-weight: 900; line-height: 1; }
+.sc-lbl { font-size: clamp(11px,1vw,13px); opacity: .9; }
+
+/* BUTTONS */
+.btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: clamp(18px,2.5vh,34px); flex-wrap: wrap; }
+.btn { border: none; border-radius: 8px; padding: clamp(10px,1.3vh,15px) clamp(20px,2.5vw,38px); font-family: 'Roboto',sans-serif; font-size: clamp(13px,1.2vw,17px); font-weight: 700; cursor: pointer; transition: all .2s; }
+.btn-p { background: var(--red); color: #fff; } .btn-p:hover { background: #c10025; } .btn-p:disabled { opacity: .4; cursor: not-allowed; }
+.btn-s { background: var(--white); color: var(--dark); border: 2px solid #ddd; } .btn-s:hover { border-color: var(--grey); }
+
+footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh,13px) clamp(16px,3vw,48px); display: flex; align-items: center; justify-content: space-between; font-size: clamp(10px,.9vw,12px); color: var(--grey); flex-shrink: 0; }
+
+@media(max-width:680px) {
+  .calc-wrap,.drag-area,.sum-grid { grid-template-columns: 1fr; }
+  main { padding: 14px 10px; justify-content: flex-start; }
+  header { padding: 10px 14px; }
+  .prog-outer { width: 80px; }
+  .logo-sub { display: none; }
+
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-c">C</div>
+    <div><div class="logo-text">Citadele</div><div class="logo-sub">Nauda &amp; Es — Finanšu Pratība</div></div>
+  </div>
+  <div class="progress-wrap">
+    <span class="slide-counter" id="sctr">1 / 16</span>
+    <div class="prog-outer"><div class="prog-inner" id="prog" style="width:6%"></div></div>
+    <div class="score-badge">⭐ <span id="pts">0</span> pts</div>
+  </div>
+</header>
+
+<main>
+
+<!-- S1 HERO -->
+<div class="slide active" id="s1">
+  <div class="slide-hero">
+    <div class="eyebrow">Citadele Ēnošanas diena 2025</div>
+    <h1>Nauda &amp; <span>Es</span> 💸</h1>
+    <div class="time-tag">⏱ 20 minūtes · Interaktīvs · Pelni punktus</div>
+    <br>
+    <p class="topics">Tēmas: <strong style="color:#FFB3B3">Krāpšana un pikšķerēšana</strong> · <strong style="color:#FFB3B3">Uzkrājumi vs tēriņi</strong> · <strong style="color:#FFB3B3">Vajadzības vs vēlmes</strong> · <strong style="color:#FFB3B3">Digitālā pēda</strong></p>
+  </div>
+  <div class="btn-row"><button class="btn btn-p" onclick="go(2)">Sākam! →</button></div>
+</div>
+
+<!-- S2 POLL -->
+<div class="slide" id="s2">
+  <div class="slide-content">
+    <span class="tag">🙋 ĀTRĀ APTAUJA</span>
+    <div class="qquestion">Esi godīgs — uz ko tērē lielāko daļu naudas?</div>
+    <div class="qscenario">Nepareizu atbilžu nav. Vienkārši iesildamies!</div>
+    <div class="poll-opts" id="poll1">
+      <button class="pbtn" onclick="vote(this,'poll1')">🛍️ Apģērbs, sneakeri, merch</button>
+      <button class="pbtn" onclick="vote(this,'poll1')">🍔 Ēdiens, dzērieni, Wolt/Bolt Food</button>
+      <button class="pbtn" onclick="vote(this,'poll1')">🎮 Spēles, aplikācijas, abonementi</button>
+      <button class="pbtn" onclick="vote(this,'poll1')">💾 Es patiesībā uzkrāju</button>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(1)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(3)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S3 SECTION -->
+<div class="slide" id="s3">
+  <div class="slide-section">
+    <div class="big-icon">🎣</div>
+    <div class="chapter">1. nodaļa no 4</div>
+    <h2>Krāpšana, Pikšķerēšana un Izkrāpšana</h2>
+    <p>Ja Instagram tas izskatās pārāk labi, lai būtu patiesība — tā nav patiesība.</p>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(2)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(4)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S4 FRAUD INFO -->
+<div class="slide" id="s4">
+  <div class="slide-content">
+    <span class="tag">📖 IEPAZĪSTI IENAIDNIEKU</span>
+    <h2>Kā krāpnieki vēršas pret tevi</h2>
+    <div class="subtitle">2025. gadā Latvijā tika reģistrēti vairāk nekā 2 000 krāpšanas gadījumu četros mēnešos vien — kopējie zaudējumi pārsniedza 3,3 miljonus eiro. Jauniešus bieži vervē kā „naudas kurjerus". Lūk, kā tas notiek.</div>
+    <div class="cards-grid">
+      <div class="info-card rb"><div class="card-icon">📩</div><h3>Pikšķerēšana (Phishing)</h3><p>Viltus DM Instagram vai Discord, kas izliekas par tavu banku, Steam vai zīmolu — lūdz paroli vai kartes datus.</p></div>
+      <div class="info-card pb"><div class="card-icon">💎</div><h3>Viltus Konkursi</h3><p>„Tu uzvarēji 500 €! Nosūti 10 € piegādei." Īstie konkursi NEKAD nelūdz maksāt, lai saņemtu balvu.</p></div>
+      <div class="info-card pkb"><div class="card-icon">👾</div><h3>Konta Pārņemšana</h3><p>„Draugs" Discord vai TikTok lūdz noklikšķināt saiti, lai „pārbaudītu spēli". Tā nozog tava konta datus.</p></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(3)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(5)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S5 PHISHING GAME -->
+<div class="slide" id="s5">
+  <div class="slide-content">
+    <span class="tag">🎮 MINISPĒLE — Atpazīsti krāpšanu</span>
+    <h2>Īsts vai Krāpniecisks?</h2>
+    <div class="subtitle">Izlasi katru ziņojumu. Vai tas ir īsts vai pikšķerēšanas mēģinājums? +10 pts par katru pareizo atbildi.</div>
+    <div id="phgame"></div>
+    <div class="ph-score" id="phscore" style="display:none"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(4)">← Atpakaļ</button>
+    <button class="btn btn-p" id="phnext" onclick="go(6)" disabled>Tālāk →</button>
+  </div>
+</div>
+
+<!-- S6 QUIZ RESULT + TIPS -->
+<div class="slide" id="s6">
+  <div class="slide-content">
+    <span class="tag">🚩 KĀ SEVI PASARGĀT</span>
+    <div id="ph-result-summary" style="background:rgba(128,79,145,.08);border-radius:12px;padding:clamp(12px,1.5vh,18px);margin-bottom:clamp(16px,2.5vh,28px);font-size:clamp(14px,1.3vw,18px);font-weight:700;color:var(--dark)"></div>
+    <h2>5 Brīdinājuma Signāli — Iegaumē!</h2>
+    <div class="subtitle">Ja pamanīsi kaut vienu no šiem — aizver lapu un bloķē sūtītāju.</div>
+    <ul class="tips">
+      <li><div class="tnum">1</div><div><strong>Steidzamības spiediens</strong> — „Rīkojies TŪLĪT, pretējā gadījumā konts tiks dzēsts!" Īstas bankas tā nekad nedraud.</div></li>
+      <li><div class="tnum">2</div><div><strong>Dīvaina sūtītāja adrese</strong> — support@citadele-secure.ru ≠ citadele.lv. Rūpīgi pārbaudi domēnu.</div></li>
+      <li><div class="tnum">3</div><div><strong>Lūdz paroli vai PIN kodu</strong> — Neviens īsts uzņēmums nekad nelūdz tavu paroli.</div></li>
+      <li><div class="tnum">4</div><div><strong>Saites izskatās aizdomīgi</strong> — Pirms klikšķini, paskatieties uz saiti. citadele-login.xyz ≠ citadele.lv</div></li>
+      <li><div class="tnum">5</div><div><strong>Pārāk laba balva</strong> — Bezmaksas iPhone, 200 €, bezmaksas Robux. Vienmēr ir kāds ķerts.</div></li>
+    </ul>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(5)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(7)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S7 SECTION -->
+<div class="slide" id="s7">
+  <div class="slide-section">
+    <div class="big-icon">🧠</div>
+    <div class="chapter">2. nodaļa no 4</div>
+    <h2>Vajadzības vs Vēlmes</h2>
+    <p>Tavs smadzenes ir burtiski radītas, lai tās sajauktu.</p>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(6)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(8)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S8 SORT GAME -->
+<div class="slide" id="s8">
+  <div class="slide-content">
+    <span class="tag">🎮 SAŠĶIRO TO — +5 pts par katru pareizu</span>
+    <h2>Vajadzība vai Vēlme?</h2>
+    <div class="subtitle">Velc katru lietu uz pareizo grozu. Dažas var pārsteigt!</div>
+    <div class="item-bank" id="ibank"></div>
+    <div class="drag-area">
+      <div class="drop-zone nz"><span class="zlabel">✅ Vajadzība</span><div id="nzone"></div></div>
+      <div class="drop-zone wz"><span class="zlabel">🛍 Vēlme</span><div id="wzone"></div></div>
+    </div>
+    <div id="sortfb" class="fb" style="margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5;display:none"></div>
+    <div class="btn-row" style="margin-top:10px;justify-content:flex-start;">
+      <button class="btn btn-s" onclick="checkSort()">Pārbaudi atbildes</button>
+      <button class="btn btn-s" onclick="resetSort()">Sākt no jauna</button>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(7)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(9)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S9 SECTION -->
+<div class="slide" id="s9">
+  <div class="slide-section">
+    <div class="big-icon">💰</div>
+    <div class="chapter">3. nodaļa no 4</div>
+    <h2>Uzkrājumi vs Tēriņi</h2>
+    <p>Mazi ieradumi šodien = lielā brīvība rīt.</p>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(8)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(10)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S10 COSTS -->
+<div class="slide" id="s10">
+  <div class="slide-content">
+    <span class="tag">💡 PATIESĀ CENA</span>
+    <h2>Cik tavie ieradumi maksā patiesībā</h2>
+    <div class="subtitle">Mazie pirkumi summējas ātri. Aplūko gada kopsummu.</div>
+    <div class="cards-grid">
+      <div class="info-card rb"><div class="card-icon">☕</div><h3>Kafija ārā katru dienu</h3><p>3 € × 365 = <strong style="color:var(--red)">1 095 € / gadā</strong><br>Tas ir lēts lidojums + nedēļa ārzemēs.</p></div>
+      <div class="info-card pb"><div class="card-icon">🎵</div><h3>5 neizmantoti abonementi</h3><p>5 × 7 € = 35 €/mēnesī = <strong style="color:var(--purple)">420 € / gadā</strong><br>Pārbaudi savu telefonu un atcel nevajadzīgos abonamentus.</p></div>
+      <div class="info-card pkb"><div class="card-icon">🎮</div><h3>Pirkumi aplikācijās</h3><p>„Tikai 1,99 €" × 30 reizes/gadā = <strong style="color:var(--grey)">60 € pazuduši</strong><br>Par virtuālām lietām, kas tev nepieder.</p></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(9)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(11)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S11 CALCULATOR -->
+<div class="slide" id="s11">
+  <div class="slide-content">
+    <span class="tag">🔢 INTERAKTĪVS KALKULATORS</span>
+    <h2>Kā būtu, ja tā vietā uzkrātu?</h2>
+    <div class="subtitle">Izvēlies summu vai pabīdi slīdni — paskaties, kā aug tavi uzkrājumi.</div>
+    <div class="calc-wrap">
+      <div class="calc-inputs">
+        <div class="igroup">
+          <label>Ikmēneša uzkrājumu summa</label>
+          <div class="calc-presets" id="presets">
+            <button class="preset-btn" onclick="setPreset(10)">10 €</button>
+            <button class="preset-btn" onclick="setPreset(30)">30 €</button>
+            <button class="preset-btn active" onclick="setPreset(50)">50 €</button>
+            <button class="preset-btn" onclick="setPreset(100)">100 €</button>
+            <button class="preset-btn" onclick="setPreset(200)">200 €</button>
+          </div>
+          <input type="range" id="cmon" min="10" max="300" value="50" oninput="calcUpdate()">
+          <div class="val-disp"><span id="cmonv">50</span> €/mēnesī</div>
+        </div>
+        <div class="igroup">
+          <label>Uzkrājumu gadi</label>
+          <input type="range" id="cyr" min="1" max="10" value="3" oninput="calcUpdate()">
+          <div class="val-disp"><span id="cyrv">3</span> gadi</div>
+        </div>
+        <div class="igroup">
+          <label>Gada procentu likme (uzkrājumu konts)</label>
+          <input type="range" id="cint" min="1" max="6" step="0.5" value="3" oninput="calcUpdate()">
+          <div class="val-disp"><span id="cintv">3,0</span> %</div>
+        </div>
+      </div>
+      <div class="calc-res">
+        <div class="rlabel">Tev būtu</div>
+        <div class="rvalue" id="ctotal">1 878 €</div>
+        <div class="rsub">pēc <span id="cyrlab">3</span> gadiem</div>
+        <div class="rmot" id="cmot">Labs klēpjdators vai ceļojums uz Japānu 🗼</div>
+      </div>
+    </div>
+    <div style="margin-top:18px;background:rgba(128,79,145,.08);border-radius:10px;padding:clamp(12px,1.5vh,18px);">
+      <strong>💡 50/30/20 noteikums:</strong> 50 % vajadzībām · 30 % vēlmēm · 20 % uzkrājumiem. Pat 10 €/nedēļā 17 gadu vecumā = 520 € pirms pilngadības.
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(10)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(12)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S12 QUIZ SAVINGS + MASCOT -->
+<div class="slide" id="s12">
+  <div class="slide-content">
+    <span class="tag">❓ VIKTORĪNA — +15 pts</span>
+    <div class="qquestion">Marta saņem 80 € kabatas naudu mēnesī. Viņa vēlas jaunus AirPods (179 €) 3 mēnešu laikā. Kāds ir gudrākais solis?</div>
+    <div class="qscenario">Pašlaik viņa tērē 80 € ēdienam un izklaidei. Vecāki teica, ka varētu palīdzēt, ja viņa parādīs plānu.</div>
+    <div class="opts" id="qsave">
+      <button class="opt" onclick="quiz('qsave',0,false)"><div class="oletter">A</div> Nopirkt ar kredītkarti tagad un maksāt vēlāk</button>
+      <button class="opt" onclick="quiz('qsave',1,true)"><div class="oletter">B</div> Uzkrāt 60 €/mēnesī 3 mēnešus, lūgt vecākus segt atlikumu kā vienošanos</button>
+      <button class="opt" onclick="quiz('qsave',2,false)"><div class="oletter">C</div> Nopirkt lētākas viltus AirPods un cerēt, ka neviens nepamanīs</button>
+      <button class="opt" onclick="quiz('qsave',3,false)"><div class="oletter">D</div> Nedarīt neko un turpināt tērēt kā parasti</button>
+    </div>
+    <div id="qsave-fb" style="margin-top:14px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5;display:none"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(11)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(13)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S13 SECTION -->
+<div class="slide" id="s13">
+  <div class="slide-section">
+    <div class="big-icon">👣</div>
+    <div class="chapter">4. nodaļa no 4</div>
+    <h2>Tava Digitālā Pēda</h2>
+    <p>Tu atstāj digitālās pēdas visur — un tās tev seko.</p>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(12)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(14)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S14 FOOTPRINT -->
+<div class="slide" id="s14">
+  <div class="slide-content">
+    <span class="tag">🕵️ TAVA DATU PĒDA ŠODIEN</span>
+    <h2>Tava digitālā pēda 1h laikā</h2>
+    <div class="subtitle">Katra aplikācija, klikšķis un ieraksts rada datus par tevi. Lūk, tipiska pusaudža rīts.</div>
+    <div class="fp-line">
+      <div class="fp-item"><div class="fp-app">📱 TikTok (8:02)</div><div class="fp-data">Noskatījies 14 video → TikTok zina tavas intereses, atrašanās vietu, ierīci, skatīšanās laiku</div><span class="fp-risk rm">Vidējs risks: izmanto mērķtiecīgai reklamēšanai</span></div>
+      <div class="fp-item"><div class="fp-app">📸 Instagram (8:15)</div><div class="fp-data">Ielaikoji 3 ierakstiem, skatījies 2 Reels → Meta izseko tavu uzvedību visos savos produktos</div><span class="fp-risk rm">Vidējs risks: kopīgots ar reklāmdevējiem</span></div>
+      <div class="fp-item"><div class="fp-app">🎮 Discord (8:30)</div><div class="fp-data">Pievienojies serverim, sūtīji ziņas → IP adrese, valoda, ierīce tiek saglabāta</div><span class="fp-risk rl">Zemāks risks, bet uzmanies no aizdomīgiem botiem</span></div>
+      <div class="fp-item"><div class="fp-app">🛒 Vinted / AndeleMandele / Amazon (8:45)</div><div class="fp-data">Skatījies apavus → pirkšanas nodoms saglabāts un pārdots datu brokeriem</div><span class="fp-risk rm">Vidējs risks: dati tiek pārdoti reklāmdevējiem, tāpēc reklāmas „seko" tev visur</span></div>
+      <div class="fp-item"><div class="fp-app">🌐 Tava digitālā reputācija (pastāvīgi)</div><div class="fp-data">Tavi publiskie ieraksti, komentāri un fotogrāfijas (pat slēgtā profilā) var nonākt potenciālā darba devēja rokās. Ja esi reģistrēts krāpnieciskā shēmā vai melnajos sarakstos, tas var bloķēt bankas kontus vai darba iespējas.</div><span class="fp-risk rh">Augsts risks: darba devēji regulāri meklē kandidātus tiešsaistē</span></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(13)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(15)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S15 QUIZ FOOTPRINT + MASCOT -->
+<div class="slide" id="s15">
+  <div class="slide-content">
+    <span class="tag">❓ VIKTORĪNA — +15 pts</span>
+    <div class="qquestion">Tu piesakies pirmajam darbam 19 gadu vecumā. Personāla atlases speciālists tevi meklē Google. Kas varētu kaitēt tavām izredzēm?</div>
+    <div class="qscenario">Tavs profils ir publisks. 16 gadu vecumā publicēji dažus asākus viedo postus un ballīšu fotogrāfijas.</div>
+    <div class="opts" id="qfp">
+      <button class="opt" onclick="quiz('qfp',0,false)"><div class="oletter">A</div> Nekas — tas bija gadus atpakaļ, viņiem tas nerūp</button>
+      <button class="opt" onclick="quiz('qfp',1,false)"><div class="oletter">B</div> Tikai ballīšu fotogrāfijas</button>
+      <button class="opt" onclick="quiz('qfp',2,true)"><div class="oletter">C</div> Abi — personāla atlases speciālisti regulāri meklē kandidātus tiešsaistē, un vecie ieraksti paliek</button>
+      <button class="opt" onclick="quiz('qfp',3,false)"><div class="oletter">D</div> Neviens, ja konta vārds ir segvārds</button>
+    </div>
+    <div id="qfp-fb" style="margin-top:14px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5;display:none"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="go(14)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="go(16)">Tālāk →</button>
+  </div>
+</div>
+
+<!-- S16 FINAL + MASCOT -->
+<div class="slide" id="s16">
+  <div class="slide-content" style="text-align:center">
+    <div class="score-circle"><div class="sc-num" id="fpts">0</div><div class="sc-lbl">punkti</div></div>
+    <h2 style="font-size:clamp(20px,2.5vw,32px);margin-bottom:8px" id="fgrade">Labi padarīts! 🎉</h2>
+    <p style="color:var(--grey);margin-bottom:clamp(16px,2.5vh,28px)" id="fmascot-msg"></p>
+    <div class="sum-grid">
+      <div class="sum-card s1"><h3>🎣 Krāpšana un Pikšķerēšana</h3><p>Neviens īsts uzņēmums nelūdz paroli. Steidzamība = brīdinājuma signāls. Pārbaudi sūtītāja domēnu.</p></div>
+      <div class="sum-card s2"><h3>🧠 Vajadzības vs Vēlmes</h3><p>Vajadzības uztur dzīvību. Vēlmes padara dzīvi baudāmu. Atšķirība = finanšu brīvība.</p></div>
+      <div class="sum-card s3"><h3>💰 Uzkrājumi vs Tēriņi</h3><p>Sāc ar 10 €/nedēļā. Procentu procenti ir burvība. Atcel neizmantotus abonementus šodien.</p></div>
+      <div class="sum-card s4"><h3>👣 Digitālā Pēda</h3><p>Meklē sevi Google. Padariet profilus privātus. Domā pirms publicē — tas paliek mūžīgi.</p></div>
+    </div>
+    <div style="margin-top:clamp(16px,2.5vh,26px);background:var(--dark);color:#fff;border-radius:12px;padding:clamp(14px,2vh,22px)">
+      <strong style="color:var(--pink)">Tavs uzdevums šonedēļ:</strong><br>
+      <span style="font-size:clamp(12px,1.1vw,15px)">✅ Pārbaudi savus abonementus &nbsp;·&nbsp; ✅ Meklē sevi Google &nbsp;·&nbsp; ✅ Izvirzi uzkrājumu mērķi</span>
+    </div>
+  </div>
+  <div class="btn-row" style="justify-content:center">
+    <button class="btn btn-s" onclick="go(15)">← Atpakaļ</button>
+    <button class="btn btn-p" onclick="restart()">🔄 Spēlēt vēlreiz</button>
+  </div>
+</div>
+
+</main>
+<footer>
+  <span>Citadele banka · Ēnošanas diena 2025 · Finanšu Pratība</span>
+  <span>citadele.lv</span>
+</footer>
+
+<script>
+var cur = 1, total = 16, score = 0;
+var phDone = 0, phOk = 0;
+var sortState = {}, sortDone = false;
+var quizResults = {};
+
+
+/* ── NAVIGATION ─────────────────────────────────────── */
+function go(n) {
+  document.getElementById('s'+cur).classList.remove('active');
+  cur = n;
+  document.getElementById('s'+cur).classList.add('active');
+  document.getElementById('sctr').textContent = cur + ' / ' + total;
+  document.getElementById('prog').style.width = ((cur/total)*100) + '%';
+  if (cur === 5) initPh();
+  if (cur === 6) renderS6Summary();
+  if (cur === 8) initSort();
+  if (cur === 11) calcUpdate();
+  if (cur === 16) showFinal();
+  window.scrollTo(0,0);
+}
+
+function addPts(p) {
+  score += p;
+  document.getElementById('pts').textContent = score;
+  var b = document.querySelector('.score-badge');
+  b.style.transform = 'scale(1.3)'; b.style.background = '#2e7d32';
+  setTimeout(function(){ b.style.transform='scale(1)'; b.style.background='var(--purple)'; }, 400);
+}
+
+/* ── PHISHING RESULT SUMMARY ─────────────────────────── */
+function renderS6Summary() {
+  var el = document.getElementById('ph-result-summary');
+  if (!el) return;
+  var msgs = ['😅 Krāpnieki ir ļoti gudri — turpini mācīties signālus!', '👍 Nesliktis! '+phOk+' no 3 pareizi. Pievērs uzmanību domēnam un steidzamībai.', '🎉 Labi! '+phOk+' no 3 atpazītas! Tu noteikti nekritīsi uz viltus e-pastiem.'];
+  el.textContent = phOk === 3 ? msgs[2] : phOk >= 1 ? msgs[1] : msgs[0];
+}
+
+/* ── POLL ────────────────────────────────────────────── */
+function vote(btn, id) {
+  var all = document.getElementById(id).querySelectorAll('.pbtn');
+  all.forEach(function(b){ b.disabled=true; });
+  btn.classList.add('voted');
+  var pcts = [35,28,22,15];
+  all.forEach(function(b,i){
+    var d = document.createElement('div');
+    d.className = 'pbar-wrap';
+    d.innerHTML = '<div class="pbar-bg"><div class="pbar-fill" style="width:0"></div></div><span class="ppct">'+pcts[i]+' %</span>';
+    b.appendChild(d);
+    setTimeout(function(){ d.querySelector('.pbar-fill').style.width=pcts[i]+'%'; }, 100);
+  });
+  addPts(5);
+}
+
+/* ── QUIZ ────────────────────────────────────────────── */
+var qfb = {
+  qsave:{ ok:'💚 Gudri! Uzkrājumu plāna izveide un sarunas ar vecākiem rāda īstu finanšu briedumu. Tā rīkojas arī īsti investori.', err:'Nav ideāli. Kredīts vēlmēm, viltus pirkšana vai nedarīšana — tas viss noved pie parādiem vai nepiepildītiem mērķiem. B variants ir jaudīgākais.' },
+  qfp:{ ok:'💚 Pareizi! 77 % personāla atlases speciālistu meklē kandidātus internetā. Vecie publiskie ieraksti, kuriem var būt uzņemti ekrānšāviņi un vēlāk iespējams izplatīti. Tava digitālā reputācija ir tava īstā reputācija.', err:'Diemžēl — abi. Personāla atlases speciālisti noteikti pārbauda sociālos tīklus, un viņi bieži var saistīt segvārdus ar īstu identitāti, izmantojot kopīgus draugus vai atzīmētos fotoattēlus.' }
+};
+
+function quiz(id, idx, correct) {
+  var all = document.querySelectorAll('#'+id+' .opt');
+  all.forEach(function(b){ b.disabled=true; });
+  quizResults[id] = correct;
+
+  var fbEl = document.getElementById(id+'-fb');
+
+  if (correct) {
+    all[idx].classList.add('correct');
+    fbEl.style.cssText = 'display:block;background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20;margin-top:14px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
+    fbEl.innerHTML = '<strong>✅ Pareizi! +15 punkti</strong> ' + qfb[id].ok;
+    addPts(15);
+  } else {
+    all[idx].classList.add('wrong-pick');
+    all.forEach(function(b){ if(b.getAttribute('onclick') && b.getAttribute('onclick').indexOf('true')>-1) b.classList.add('correct'); });
+    fbEl.style.cssText = 'display:block;background:#ffebee;border-left:4px solid #c62828;color:#b71c1c;margin-top:14px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
+    fbEl.innerHTML = '<strong>❌ Nav gluži tā.</strong> ' + qfb[id].err;
+  }
+}
+
+/* ── PHISHING GAME ───────────────────────────────────── */
+var msgs = [
+  { from:'security@citadele-verify.ru', name:'⚠️ Citadele Drošība', bg:'#ffebee', body:'STEIDZAMI: Jūsu konts ir bloķēts aizdomīgas darbības dēļ. Noklikšķiniet šeit, lai apstiprinātu savu identitāti 2 stundu laikā, pretējā gadījumā konts tiks neatgriezeniski dzēsts: http://citadele-secure.ru/login', scam:true, exp:'🚩 KRĀPŠANA: Viltus domēns (.ru, nevis .lv), steidzamības spiediens, baismīgi draudi.' },
+  { from:'no-reply@spotify.com', name:'🎵 Spotify', bg:'#f9f9f9', body:'Tavs Spotify Premium abonements tiks atjaunots 15. aprīlī par 9,99 €. Lai pārvaldītu abonementu, apmeklē sava konta iestatījumus: spotify.com/account.', scam:false, exp:'✅ ĪSTS: Reāls domēns, nav steidzamības, nav dīvainu saišu, nav lūguma pēc personas datiem.' },
+  { from:'freegifts@discord-nitro-free.com', name:'👾 Discord Atbalsts', bg:'#ede7f6', body:'Apsveicam! Tu esi izvēlēts BEZMAKSAS Discord Nitro (1 gads). Saņem savu dāvanu, ievadot pieteikšanās datus: discord-nitro-free.com/claim — piedāvājums beidzas pēc 30 minūtēm!', scam:true, exp:'🚩 KRĀPŠANA: Viltus domēns, steidzamības taimeris, lūdz pieteikšanās datus.' }
+];
+
+function initPh() {
+  var c = document.getElementById('phgame');
+  c.innerHTML=''; phDone=0; phOk=0;
+  document.getElementById('phnext').disabled=true;
+  document.getElementById('phscore').style.display='none';
+  msgs.forEach(function(m,i){
+    var d = document.createElement('div');
+    d.className='msg-card'; d.id='mc'+i;
+    d.innerHTML='<div class="msg-head" style="background:'+m.bg+'"><div class="mavatar">'+m.name.split(' ')[0]+'</div><div><div class="msender">'+m.name+'</div><div class="mfrom">No: '+m.from+'</div></div></div><div class="mbody">'+m.body+'</div><div style="padding:0 16px 14px"><div class="vbtns"><button class="vbtn legit" onclick="ph('+i+',false)">✅ Izskatās īsts</button><button class="vbtn scam" onclick="ph('+i+',true)">🚩 Tā ir krāpšana!</button></div><div id="phfb'+i+'" style="display:none;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5"></div></div>';
+    c.appendChild(d);
+  });
+}
+
+function ph(i, guess) {
+  var m = msgs[i];
+  document.getElementById('mc'+i).querySelectorAll('.vbtn').forEach(function(b){ b.disabled=true; });
+  var fb = document.getElementById('phfb'+i);
+  if (guess===m.scam) {
+    fb.style.cssText='display:block;background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5';
+    fb.innerHTML='<strong>+10 pts — Labi pamanīts!</strong> '+m.exp;
+    addPts(10); phOk++;
+  } else {
+    fb.style.cssText='display:block;background:#ffebee;border-left:4px solid #c62828;color:#b71c1c;margin-top:10px;border-radius:8px;padding:10px 14px;font-size:clamp(12px,1vw,14px);line-height:1.5';
+    fb.innerHTML='<strong>Nav gluži tā.</strong> '+m.exp;
+  }
+  phDone++;
+  if (phDone===msgs.length) {
+    var s=document.getElementById('phscore'); s.style.display='block'; s.textContent=phOk+'/'+msgs.length+' pareizi atpazīti! 🎯';
+    document.getElementById('phnext').disabled=false;
+  }
+}
+
+/* ── SORT GAME ───────────────────────────────────────── */
+var items = [
+  {t:'🍞 Pārtika / pārtikas preces',n:true},{t:'👟 Jaunas Nike kurpes',n:false},
+  {t:'💊 Zāles',n:true},{t:'🎮 Jauna PlayStation spēle',n:false},
+  {t:'🏠 Īre / mājoklis',n:true},{t:'☕ Starbucks katru dienu',n:false},
+  {t:'📱 Telefons (pamata)',n:true},{t:'🎧 AirPods Pro',n:false},
+  {t:'🚌 Transports uz skolu',n:true},{t:'🎟️ Koncerta biļetes',n:false}
+];
+
+var dragIdx = null;
+var touchClone = null;
+
+function initSort() {
+  document.getElementById('ibank').innerHTML='';
+  document.getElementById('nzone').innerHTML='';
+  document.getElementById('wzone').innerHTML='';
+  sortState={}; sortDone=false;
+  var fb=document.getElementById('sortfb'); fb.style.display='none'; fb.innerHTML='';
+  items.forEach(function(it,i){
+    sortState[i]=null;
+    var b=document.createElement('div');
+    b.className='ditem'; b.id='di'+i; b.textContent=it.t;
+    b.setAttribute('draggable','true');
+    // Mouse drag
+    b.addEventListener('dragstart', function(e){
+      dragIdx=i; b.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    b.addEventListener('dragend', function(){ b.classList.remove('dragging'); });
+    // Touch drag
+    b.addEventListener('touchstart', onTouchStart, {passive:false});
+    b.addEventListener('touchmove',  onTouchMove,  {passive:false});
+    b.addEventListener('touchend',   onTouchEnd,   {passive:false});
+    document.getElementById('ibank').appendChild(b);
+  });
+  // Drop zone events — attach to the outer .drop-zone divs
+  [{zid:'nzone', z:'n'}, {zid:'wzone', z:'w'}].forEach(function(obj){
+    var inner = document.getElementById(obj.zid);
+    var outer = inner.closest('.drop-zone');
+    outer.addEventListener('dragover', function(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; outer.classList.add('drag-over'); });
+    outer.addEventListener('dragleave', function(e){
+      if (!outer.contains(e.relatedTarget)) outer.classList.remove('drag-over');
+    });
+    outer.addEventListener('drop', function(e){
+      e.preventDefault();
+      outer.classList.remove('drag-over');
+      if (dragIdx===null) return;
+      placeIt(dragIdx, obj.z);
+      dragIdx=null;
+    });
+  });
+}
+
+/* Touch helpers */
+function onTouchStart(e) {
+  var b = e.currentTarget;
+  dragIdx = parseInt(b.id.replace('di',''));
+  // Create floating clone
+  var rect = b.getBoundingClientRect();
+  touchClone = b.cloneNode(true);
+  touchClone.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;opacity:0.85;margin:0;width:'+rect.width+'px;top:'+rect.top+'px;left:'+rect.left+'px;';
+  document.body.appendChild(touchClone);
+  b.classList.add('dragging');
+  e.preventDefault();
+}
+
+function onTouchMove(e) {
+  if (!touchClone) return;
+  var t = e.touches[0];
+  touchClone.style.top  = (t.clientY - touchClone.offsetHeight/2) + 'px';
+  touchClone.style.left = (t.clientX - touchClone.offsetWidth/2)  + 'px';
+  // Highlight drop zone under finger
+  touchClone.style.display='none';
+  var el = document.elementFromPoint(t.clientX, t.clientY);
+  touchClone.style.display='';
+  document.querySelectorAll('.drop-zone').forEach(function(zone){
+    if (zone.contains(el) || zone===el) {
+      zone.classList.add('drag-over');
+    } else {
+      zone.classList.remove('drag-over');
+    }
+  });
+  e.preventDefault();
+}
+
+function onTouchEnd(e) {
+  if (touchClone) { touchClone.remove(); touchClone=null; }
+  var b = document.getElementById('di'+dragIdx);
+  if (b) b.classList.remove('dragging');
+  var t = e.changedTouches[0];
+  // Find which zone the finger lifted over
+  var el = document.elementFromPoint(t.clientX, t.clientY);
+  document.querySelectorAll('.drop-zone').forEach(function(zone){
+    if (zone.contains(el) || zone===el) {
+      zone.classList.remove('drag-over');
+      var z = zone.querySelector('#nzone') ? 'n' : 'w';
+      placeIt(dragIdx, z);
+    }
+  });
+  dragIdx=null;
+  e.preventDefault();
+}
+
+function placeIt(i, z) {
+  var old=document.getElementById('pi'+i); if(old) old.remove();
+  sortState[i]=z;
+  var di=document.getElementById('di'+i);
+  if(di) di.classList.add('placed');
+  var p=document.createElement('div'); p.className='placed-item'; p.id='pi'+i;
+  p.innerHTML='<span>'+items[i].t+'</span><button onclick="unplace('+i+')">×</button>';
+  document.getElementById(z+'zone').appendChild(p);
+}
+
+function unplace(i) {
+  sortState[i]=null;
+  var di=document.getElementById('di'+i); if(di){ di.classList.remove('placed'); }
+  var pi=document.getElementById('pi'+i); if(pi) pi.remove();
+}
+
+function sortMenu() {} // no-op, kept for safety
+
+function checkSort() {
+  if (sortDone) return;
+  var ok=0, tot=0;
+  for (var k in sortState) {
+    if (sortState[k]!==null) { tot++; if((sortState[k]==='n')===items[k].n) ok++; }
+  }
+  var fb=document.getElementById('sortfb');
+  if (tot===0) {
+    fb.style.cssText='display:block;background:#ffebee;border-left:4px solid #c62828;color:#b71c1c;margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
+    fb.innerHTML='<strong>Vispirms ievieto vismaz dažas lietas!</strong>'; return;
+  }
+  var p=ok*5; addPts(p); sortDone=true;
+  if (ok===tot && tot===items.length) {
+    fb.style.cssText='display:block;background:#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20;margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
+    fb.innerHTML='<strong>Perfekti! '+ok+'/'+items.length+' pareizi — +'+p+' punkti! 🎉</strong> Transports un pamata telefons ir vajadzības. Starbucks un AirPods ir vēlmes.';
+  } else {
+    fb.style.cssText='display:block;background:'+(ok>=tot*.7?'#e8f5e9;border-left:4px solid #2e7d32;color:#1b5e20':'#ffebee;border-left:4px solid #c62828;color:#b71c1c')+';margin-top:12px;border-radius:10px;padding:14px 18px;font-size:clamp(13px,1.1vw,16px);line-height:1.5';
+    fb.innerHTML='<strong>'+ok+'/'+tot+' pareizi — +'+p+' punkti.</strong> Pamata telefons ir vajadzība; AirPods Pro ir vēlme.';
+  }
+}
+
+function resetSort() { sortDone=false; initSort(); }
+
+/* ── CALCULATOR ──────────────────────────────────────── */
+function setPreset(val) {
+  document.getElementById('cmon').value = val;
+  document.querySelectorAll('.preset-btn').forEach(function(b){
+    b.classList.toggle('active', parseInt(b.textContent) === val);
+  });
+  calcUpdate();
+}
+
+function calcUpdate() {
+  var mon=+document.getElementById('cmon').value;
+  var yr=+document.getElementById('cyr').value;
+  var rt=+document.getElementById('cint').value/100;
+  document.getElementById('cmonv').textContent=mon;
+  document.getElementById('cyrv').textContent=yr;
+  document.getElementById('cintv').textContent=parseFloat(document.getElementById('cint').value).toFixed(1).replace('.',',');
+  document.getElementById('cyrlab').textContent=yr;
+  // sync preset buttons
+  document.querySelectorAll('.preset-btn').forEach(function(b){
+    b.classList.toggle('active', parseInt(b.textContent)===mon);
+  });
+  var n=yr*12, r=rt/12;
+  var tot=r>0?mon*((Math.pow(1+r,n)-1)/r):mon*n;
+  document.getElementById('ctotal').textContent=Math.round(tot).toLocaleString('lv-LV')+' €';
+  var ms=[[200,'Pietiek jaunam spēļu datoram 🎮'],[500,'Kvalitatīvs klēpjdators vai ceļojums ✈️'],[1000,'Lēts lidojums + nedēļa ārzemēs 🌍'],[2000,'Lietota auto pirmā iemaksa 🚗'],[5000,'Pirmais solis uz savu dzīvokli 🏠'],[10000,'Īsta finansiālā neatkarība 💼']];
+  var mot=ms[0][1]; for(var j=0;j<ms.length;j++){if(tot>=ms[j][0])mot=ms[j][1];}
+  document.getElementById('cmot').textContent=mot;
+}
+
+/* ── FINAL SLIDE ─────────────────────────────────────── */
+function showFinal() {
+  document.getElementById('fpts').textContent=score;
+  var gs=[
+    [0,  'Turpini mācīties! Katrs eksperts kādreiz sāka. 📚', 'Neuztraucies — tagad zini vairāk nekā pirms 20 minūtēm! Sāc ar vienu soli: atcel vienu nevajadzīgu abonementu šodien.'],
+    [20, 'Labs sākums! Tu veido gudrus ieradumus. 💪',         'Labi! Tagad, kad zini pamatus, liek tos lietā. Ko tu mainīsi šonedēļ?'],
+    [50, 'Solīdi! Tu pārzini naudas lietas. 🌟',               'Iespaidīgi! Tev jau ir labi finanšu instinkti. Pastāsti draugam par 50/30/20 noteikumu!'],
+    [80, 'Iespaidīgi! Nākotnes finanšu profesionālis? 🏆',     'Wow, tu tiešām klausījies! Ar šādām zināšanām 18 gadu vecumā — tev ir milzu priekšrocība.'],
+    [110,'Ideāls rezultāts! Tu esi gatavs īstajai pasaulei. 🚀','PERFEKTS REZULTĀTS! Vai esi pārliecināts, ka tev nav jau bankas konts ar uzkrājumiem? 😄']
+  ];
+  var g=gs[0]; for(var i=0;i<gs.length;i++){if(score>=gs[i][0])g=gs[i];}
+  document.getElementById('fgrade').textContent=g[1];
+  document.getElementById('fmascot-msg').textContent=g[2];
+}
+
+/* ── RESTART ─────────────────────────────────────────── */
+function restart() {
+  score=0; phDone=0; phOk=0; sortState={}; sortDone=false; quizResults={};
+  document.getElementById('pts').textContent=0;
+  // reset quiz UI
+  ['qsave','qfp'].forEach(function(id){
+    var opts=document.querySelectorAll('#'+id+' .opt');
+    opts.forEach(function(b){ b.disabled=false; b.classList.remove('correct','wrong-pick'); });
+    var fbEl=document.getElementById(id+'-fb');
+    if(fbEl){ fbEl.style.display='none'; fbEl.innerHTML=''; }
+  });
+  // reset phishing
+  initPh();
+  // reset sort
+  initSort();
+  // reset calc
+  calcUpdate();
+  // reset ph-result-summary
+  var s=document.getElementById('ph-result-summary'); if(s) s.textContent='';
+  go(1);
+}
+
+window.onload = function() { calcUpdate(); initSort(); };
+
+/* ── BLOCK PULL-TO-REFRESH ───────────────────────────── */
+var lastTouchY = 0;
+document.addEventListener('touchstart', function(e) {
+  lastTouchY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchmove', function(e) {
+  var dy = e.touches[0].clientY - lastTouchY;
+  // Block downward pull when already at top of page
+  if (dy > 0 && (document.documentElement.scrollTop === 0 || document.body.scrollTop === 0)) {
+    e.preventDefault();
+  }
+}, { passive: false });
+</script>
+</body>
+</html>
