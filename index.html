@@ -727,6 +727,9 @@ function initSort() {
   document.getElementById('wzone').innerHTML='';
   sortState={}; sortDone=false;
   var fb=document.getElementById('sortfb'); fb.style.display='none'; fb.innerHTML='';
+  var sc=document.getElementById('sortcheck'); if(sc) sc.disabled=true;
+  var sn=document.getElementById('sortnext'); if(sn) sn.disabled=true;
+  document.querySelectorAll('.drop-zone').forEach(function(z){ z.style.pointerEvents=''; });
   items.forEach(function(it,i){
     sortState[i]=null;
     var b=document.createElement('div');
@@ -875,6 +878,8 @@ function checkAllPlaced() {
 
 function checkSort() {
   if (sortDone) return;
+  var allPlaced = items.every(function(_, i){ return sortState[i] !== null; });
+  if (!allPlaced) return;
   var ok=0;
   items.forEach(function(it, k) {
     var z = sortState[k];
