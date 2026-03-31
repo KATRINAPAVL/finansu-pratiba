@@ -1005,7 +1005,7 @@ function saveResult(name, pts) {
       .then(function(data) {
         var existing = [];
         if (data.content) {
-          try { existing = JSON.parse(atob(data.content.replace(/\n/g,''))); } catch(e){}
+          try { existing = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,''))))); } catch(e){}
         }
         existing.push({ name: name, score: pts, time: new Date().toISOString() });
         var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
@@ -1039,7 +1039,7 @@ function loadLeaderboard() {
     .then(function(data) {
       var results = [];
       if (data.content) {
-        try { results = JSON.parse(atob(data.content.replace(/\n/g,''))); } catch(e){}
+        try { results = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,''))))); } catch(e){}
       }
       if (results.length === 0) { el.innerHTML='<div style="color:var(--grey);padding:20px">Nav rezultātu vēl.</div>'; return; }
       results.sort(function(a,b){ return b.score - a.score; });
