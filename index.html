@@ -190,8 +190,31 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
 
 <main>
 
+<!-- NAME ENTRY -->
+<div class="slide active" id="s0">
+  <div class="slide-hero" style="max-width:520px;margin:0 auto">
+    <div class="eyebrow">Citadele Ēnošanas diena 2025</div>
+    <h1>Nauda &amp; <span>Es</span> 💸</h1>
+    <div class="time-tag">⏱ 20 minūtes · Interaktīvs · Pelni punktus</div>
+    <br>
+    <div style="margin:clamp(18px,3vh,32px) 0 clamp(12px,2vh,20px)">
+      <label style="display:block;font-size:clamp(13px,1.2vw,16px);color:#FFB3B3;font-weight:700;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;">Ievadi savu vārdu</label>
+      <input id="playerName" type="text" placeholder="Vārds..." maxlength="40"
+        style="width:100%;padding:clamp(12px,1.8vh,18px) 16px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:'Roboto',sans-serif;font-size:clamp(16px,1.8vw,22px);font-weight:700;outline:none;"
+        oninput="document.getElementById('startBtn').disabled=this.value.trim().length<2"
+        onkeydown="if(event.key==='Enter'&&this.value.trim().length>=2)startGame()"/>
+    </div>
+    <button id="startBtn" class="btn btn-p" onclick="startGame()" disabled
+      style="width:100%;padding:clamp(14px,2vh,20px);font-size:clamp(15px,1.5vw,20px);border-radius:10px;opacity:1;background:#E3002C;border:none;">
+      Sākam! →
+    </button>
+    <br><br>
+    <p class="topics">Tēmas: <strong style="color:#FFB3B3">Krāpšana</strong> · <strong style="color:#FFB3B3">Uzkrājumi</strong> · <strong style="color:#FFB3B3">Vajadzības vs vēlmes</strong> · <strong style="color:#FFB3B3">Digitālā pēda</strong></p>
+  </div>
+</div>
+
 <!-- S1 HERO -->
-<div class="slide active" id="s1">
+<div class="slide" id="s1">
   <div class="slide-hero">
     <div class="eyebrow">Citadele Ēnošanas diena 2025</div>
     <h1>Nauda &amp; <span>Es</span> 💸</h1>
@@ -499,7 +522,24 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
   </div>
   <div class="btn-row" style="justify-content:center">
     <button class="btn btn-s" onclick="go(15)">← Atpakaļ</button>
-    <button class="btn btn-p" onclick="restart()">🔄 Spēlēt vēlreiz</button>
+    <button class="btn btn-p" onclick="go(17);loadLeaderboard()">🏆 Rezultātu tabula</button>
+    <button class="btn btn-s" onclick="restart()">🔄 Spēlēt vēlreiz</button>
+  </div>
+</div>
+
+<!-- S17 LEADERBOARD -->
+<div class="slide" id="s17">
+  <div class="slide-content" style="text-align:center">
+    <span class="tag">🏆 REZULTĀTU TABULA</span>
+    <h2 style="margin-bottom:8px">Līderu saraksts</h2>
+    <p class="subtitle">Visi dalībnieki — augstākais rezultāts augšā</p>
+    <div id="lb-list" style="margin:clamp(16px,2.5vh,28px) 0;min-height:80px">
+      <div style="color:var(--grey);font-size:14px;padding:20px">Ielādē...</div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-s" onclick="loadLeaderboard()">🔄 Atjaunot</button>
+      <button class="btn btn-s" onclick="go(16)">← Atpakaļ</button>
+    </div>
   </div>
 </div>
 
@@ -510,10 +550,25 @@ footer { background: #fff; border-top: 1px solid #e8e8e8; padding: clamp(8px,1vh
 </footer>
 
 <script>
-var cur = 1, total = 16, score = 0;
+var cur = 0, total = 16, score = 0;
 var phDone = 0, phOk = 0;
 var sortState = {}, sortDone = false;
 var quizResults = {};
+var playerName = '';
+
+/* ── GITHUB CONFIG ───────────────────────────────────── */
+var GH_TOKEN = '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';
+var GH_OWNER = 'KATRINAPAVL';
+var GH_REPO  = 'finansu-pratiba';
+var GH_FILE  = 'results.json';
+
+/* ── NAME ENTRY ──────────────────────────────────────── */
+function startGame() {
+  var n = document.getElementById('playerName').value.trim();
+  if (n.length < 2) return;
+  playerName = n;
+  go(1);
+}
 
 
 /* ── NAVIGATION ─────────────────────────────────────── */
@@ -521,8 +576,8 @@ function go(n) {
   document.getElementById('s'+cur).classList.remove('active');
   cur = n;
   document.getElementById('s'+cur).classList.add('active');
-  document.getElementById('sctr').textContent = cur + ' / ' + total;
-  document.getElementById('prog').style.width = ((cur/total)*100) + '%';
+  document.getElementById('sctr').textContent = (cur <= 0 ? 1 : cur) + ' / ' + total;
+  document.getElementById('prog').style.width = ((Math.max(cur,1)/total)*100) + '%';
   if (cur === 5) initPh();
   if (cur === 6) renderS6Summary();
   if (cur === 8) initSort();
@@ -814,13 +869,67 @@ function showFinal() {
   var g=gs[0]; for(var i=0;i<gs.length;i++){if(score>=gs[i][0])g=gs[i];}
   document.getElementById('fgrade').textContent=g[1];
   document.getElementById('fmascot-msg').textContent=g[2];
+  saveResult(playerName, score);
+}
+
+/* ── GITHUB RESULTS ──────────────────────────────────── */
+function saveResult(name, pts) {
+  if (!name) return;
+  var url = 'https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+GH_FILE;
+  var headers = { 'Authorization': 'token '+GH_TOKEN, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+  // First read existing file to get SHA
+  fetch(url, { headers: headers })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var existing = [];
+      if (data.content) {
+        try { existing = JSON.parse(atob(data.content.replace(/\n/g,''))); } catch(e){}
+      }
+      // Add new entry
+      existing.push({ name: name, score: pts, time: new Date().toISOString() });
+      var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
+      var body = { message: 'Result: '+name+' ('+pts+' pts)', content: encoded };
+      if (data.sha) body.sha = data.sha;
+      return fetch(url, { method: 'PUT', headers: headers, body: JSON.stringify(body) });
+    })
+    .catch(function(e){ console.warn('Could not save result:', e); });
+}
+
+function loadLeaderboard() {
+  var el = document.getElementById('lb-list');
+  el.innerHTML = '<div style="color:var(--grey);font-size:14px;padding:20px">Ielādē...</div>';
+  var url = 'https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+GH_FILE;
+  fetch(url+'?t='+Date.now(), { headers: { 'Authorization': 'token '+GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' } })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var results = [];
+      if (data.content) {
+        try { results = JSON.parse(atob(data.content.replace(/\n/g,''))); } catch(e){}
+      }
+      if (results.length === 0) { el.innerHTML='<div style="color:var(--grey);padding:20px">Nav rezultātu vēl.</div>'; return; }
+      results.sort(function(a,b){ return b.score - a.score; });
+      var medals = ['🥇','🥈','🥉'];
+      var html = '';
+      results.forEach(function(r, i) {
+        var medal = medals[i] || (i+1)+'.';
+        var bg = i===0?'rgba(227,0,44,.07)':i===1?'rgba(128,79,145,.07)':i===2?'rgba(255,179,179,.2)':'rgba(103,95,107,.05)';
+        html += '<div style="display:flex;align-items:center;gap:14px;padding:clamp(10px,1.5vh,16px) clamp(12px,2vw,20px);background:'+bg+';border-radius:10px;margin-bottom:8px;">'
+          + '<span style="font-size:clamp(20px,2.5vw,28px);width:36px;flex-shrink:0">'+medal+'</span>'
+          + '<span style="flex:1;font-weight:700;font-size:clamp(14px,1.3vw,18px);text-align:left">'+r.name+'</span>'
+          + '<span style="font-weight:900;font-size:clamp(16px,1.8vw,22px);color:var(--red)">'+r.score+' pts</span>'
+          + '</div>';
+      });
+      el.innerHTML = html;
+    })
+    .catch(function(){ el.innerHTML='<div style="color:#c62828;padding:20px">Nevarēja ielādēt rezultātus.</div>'; });
 }
 
 /* ── RESTART ─────────────────────────────────────────── */
 function restart() {
-  score=0; phDone=0; phOk=0; sortState={}; sortDone=false; quizResults={};
+  score=0; phDone=0; phOk=0; sortState={}; sortDone=false; quizResults={}; playerName='';
   document.getElementById('pts').textContent=0;
-  // reset quiz UI
+  document.getElementById('playerName').value='';
+  document.getElementById('startBtn').disabled=true;
   ['qsave','qfp'].forEach(function(id){
     var opts=document.querySelectorAll('#'+id+' .opt');
     opts.forEach(function(b){ b.disabled=false; b.classList.remove('correct','wrong-pick'); });
@@ -835,7 +944,7 @@ function restart() {
   calcUpdate();
   // reset ph-result-summary
   var s=document.getElementById('ph-result-summary'); if(s) s.textContent='';
-  go(1);
+  go(0);
 }
 
 window.onload = function() { calcUpdate(); initSort(); };
